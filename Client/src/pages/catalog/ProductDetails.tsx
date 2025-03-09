@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import {useEffect, useState} from "react";
 import { IProduct } from "../../model/IProduct";
 import requests from "../../api/request";
+import NotFound from "../../errors/NotFound";
 
 export default function ProductDetails(){
     
@@ -17,7 +18,7 @@ export default function ProductDetails(){
     
     if(loading) return <CircularProgress />;
     
-    if(!product) return <h5>Product not found...</h5>;
+    if(!product) return <NotFound />
     
     return(        
         <Grid2 container spacing={6}>
