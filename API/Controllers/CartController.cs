@@ -1,5 +1,6 @@
 using API.Data;
 using API.Entity;
+using API.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,10 +17,9 @@ public class CartController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<Cart>> GetCart()
+    public async Task<ActionResult<CartDTO>> GetCart()
     {
-        var cart = await GetOrCreate();
-        return cart;
+        return CartToDTO(await GetOrCreate());
     }
 
     [HttpPost]
@@ -37,12 +37,29 @@ public class CartController : ControllerBase
         var result = await _context.SaveChangesAsync() > 0;
 
         if (result)
-            return CreatedAtAction(nameof(GetCart), cart);
+            return CreatedAtAction(nameof(GetCart), CartToDTO(cart));
 
         return BadRequest(new ProblemDetails { Title = "The product can not be added to cart" });
     }
 
-    private async Task<Cart> GetOrCreate()
+    [HttpDelete]
+    public async Task<ActionResult> DeleteItemFromCart(int productId, int quantity)
+    {
+        var cart = await GetOrCreate();
+
+        cart.DeleteItem(productId, quantity);
+
+        var result = await _context.SaveChangesAsync() > 0;
+
+        if (result)
+        {
+            return Ok();
+        }
+
+        return BadRequest(new ProblemDetails { Title = "Problem removing item from the cart" });
+    }
+
+    async Task<Cart> GetOrCreate()
     {
         var cart = await _context.Carts
                     .Include(i => i.CartItems)
@@ -68,5 +85,22 @@ public class CartController : ControllerBase
         }
 
         return cart;
+    }
+
+    CartDTO CartToDTO(Cart cart)
+    {
+        return new CartDTO
+        {
+            CartId = cart.CartId,
+            CustomerId = cart.CustomerId,
+            CartItems = cart.CartItems.Select(i => new CartItemDTO
+            {
+                ProductId = i.ProductId,
+                Name = i.Product.Name,
+                Price = i.Product.Price,
+                Quantity = i.Quantity,
+                ImageUrl = i.Product.ImageUrl
+            }).ToList()
+        };
     }
 }
