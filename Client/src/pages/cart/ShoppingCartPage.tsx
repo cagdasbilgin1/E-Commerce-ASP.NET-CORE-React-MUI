@@ -1,12 +1,32 @@
-﻿import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+﻿import { Alert, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { AddCircleOutline, Delete, RemoveCircleOutline } from "@mui/icons-material";
 import { useCartContext } from "../../context/CartContext";
+import { useState } from "react";
+import requests from "../../api/requests";
 
 export default function ShoppingCartPage()
 {
-    const { cart } = useCartContext();
+    const { cart, setCart } = useCartContext();
+    const [status, setStatus] = useState({ loading : false, id: ""});
 
-    if(!cart) return <h1>Cart is empty</h1>
+    function handleAddItem(productId: number, id : string) {
+        setStatus({loading : true, id: id});
+        requests.Cart.addItem(productId)
+            .then(cart => setCart(cart))
+            .catch(error => console.log(error))
+            .finally(() => setStatus({ loading: false, id: "" }))
+    }
+
+    function handleDeleteItem(productId: number, id = "", quantity = 1) {
+        setStatus({ loading: true, id: id });
+
+        requests.Cart.deleteItem(productId, quantity)
+            .then(cart => setCart(cart))
+            .catch(error => console.log(error))
+            .finally(() => setStatus({ loading: false, id: "" }))
+    }
+
+    if (cart?.cartItems.length === 0) return <Alert severity="warning">Cart is empty</Alert>    
 
     return (
         <TableContainer component={Paper}>
@@ -22,7 +42,7 @@ export default function ShoppingCartPage()
                 </TableRow>
             </TableHead>
             <TableBody>
-                {cart.cartItems.map((item) => (
+                {cart?.cartItems.map((item) => (
                     <TableRow key={item.productId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                         <TableCell align="center" component="th" scope="row">
                             <img src={`http://localhost:5291/images/${item.imageUrl}`} style={{ height: 60 }} />
@@ -31,12 +51,27 @@ export default function ShoppingCartPage()
                             {item.name}
                         </TableCell>
                         <TableCell align="center">{item.price} ₺</TableCell>
-                        <TableCell align="center">{item.quantity}</TableCell>
+                        <TableCell align="center">
+                            <Button
+                                onClick={() => handleDeleteItem(item.productId, "del" + item.productId)}
+                                loading={status.loading && status.id === "del" + item.productId}>
+                                <RemoveCircleOutline />
+                            </Button>
+                            {item.quantity}
+                            <Button
+                                onClick={() => handleAddItem(item.productId, "add" + item.productId)}
+                                loading={status.loading && status.id === "add" + item.productId}>
+                                <AddCircleOutline />
+                            </Button>
+                        </TableCell>
                         <TableCell align="center">{item.price * item.quantity} ₺</TableCell>
                         <TableCell align="center">
-                            <IconButton color="error">
+                            <Button
+                                color="error"
+                                onClick={() => handleDeleteItem(item.productId, "dell_all" + item.productId, item.quantity)}
+                                loading={status.loading && status.id === "dell_all" + item.productId}>
                                 <Delete />
-                            </IconButton>
+                            </Button>
                         </TableCell>
                     </TableRow>
                 ))}

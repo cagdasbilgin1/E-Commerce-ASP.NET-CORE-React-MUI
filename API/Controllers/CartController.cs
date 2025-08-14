@@ -53,7 +53,7 @@ public class CartController : ControllerBase
 
         if (result)
         {
-            return Ok();
+            return CreatedAtAction(nameof(GetCart), CartToDTO(cart));
         }
 
         return BadRequest(new ProblemDetails { Title = "Problem removing item from the cart" });
