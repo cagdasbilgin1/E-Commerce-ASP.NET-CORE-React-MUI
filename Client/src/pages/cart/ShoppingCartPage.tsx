@@ -3,6 +3,9 @@ import { AddCircleOutline, Delete, RemoveCircleOutline } from "@mui/icons-materi
 import { useCartContext } from "../../context/CartContext";
 import { useState } from "react";
 import requests from "../../api/requests";
+import { toast } from "react-toastify";
+import CartSummary from "./CartSummary";
+import { currenyTRY } from "../../utils/formatCurrency";
 
 export default function ShoppingCartPage()
 {
@@ -50,7 +53,7 @@ export default function ShoppingCartPage()
                         <TableCell align="center" component="th" scope="row">
                             {item.name}
                         </TableCell>
-                        <TableCell align="center">{item.price} ₺</TableCell>
+                        <TableCell align="center">{currenyTRY.format(item.price)}</TableCell>
                         <TableCell align="center">
                             <Button
                                 onClick={() => handleDeleteItem(item.productId, "del" + item.productId)}
@@ -64,17 +67,21 @@ export default function ShoppingCartPage()
                                 <AddCircleOutline />
                             </Button>
                         </TableCell>
-                        <TableCell align="center">{item.price * item.quantity} ₺</TableCell>
+                        <TableCell align="center">{currenyTRY.format(item.price * item.quantity)}</TableCell>
                         <TableCell align="center">
                             <Button
                                 color="error"
-                                onClick={() => handleDeleteItem(item.productId, "dell_all" + item.productId, item.quantity)}
+                                onClick={() => {
+                                    handleDeleteItem(item.productId, "del_all" + item.productId, item.quantity);
+                                    toast.error("Product deleted.");
+                                }}
                                 loading={status.loading && status.id === "dell_all" + item.productId}>
                                 <Delete />
                             </Button>
                         </TableCell>
                     </TableRow>
                 ))}
+                <CartSummary />
             </TableBody>
         </Table>
         </TableContainer>

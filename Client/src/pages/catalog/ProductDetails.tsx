@@ -1,15 +1,23 @@
-﻿import {CircularProgress, Divider, Grid2, Table, TableBody, TableCell, TableContainer, TableRow, Typography} from "@mui/material";
+﻿import { Button, CircularProgress, Divider, Grid2, Stack, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import {useEffect, useState} from "react";
 import { IProduct } from "../../model/IProduct";
 import requests from "../../api/requests";
 import NotFound from "../../errors/NotFound";
+import { AddShoppingCart } from "@mui/icons-material";
+import { useCartContext } from "../../context/CartContext";
+import { toast } from "react-toastify";
+import { currenyTRY } from "../../utils/formatCurrency"
 
 export default function ProductDetailsPage() {
 
+    const { cart, setCart } = useCartContext();
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<IProduct | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isAdded, setIsAdded] = useState(false);
+
+    const item = cart?.cartItems.find(i => i.productId == product?.id);
 
     useEffect(() => {
         id && requests.Catalog.details(parseInt(id))
@@ -17,6 +25,18 @@ export default function ProductDetailsPage() {
             .catch(error => console.log(error))
             .finally(() => setLoading(false));
     }, [id]);
+
+    function handleAddItem(id: number) {
+        setIsAdded(true);
+
+        requests.Cart.addItem(id)
+            .then(cart => {
+                setCart(cart);
+                toast.success("Added to cart.");
+            })
+            .catch(error => console.log(error))
+            .finally(() => setIsAdded(false));
+    }
 
     if (loading) return <CircularProgress />
 
@@ -30,7 +50,7 @@ export default function ProductDetailsPage() {
             <Grid2 size={{ xl: 9, lg: 8, md: 7, sm: 6, xs: 12 }}>
                 <Typography variant="h3">{product.name}</Typography>
                 <Divider sx={{ mb: 2 }} />
-                <Typography variant="h4" color="secondary">{(product.price / 100).toFixed(2)} ₺</Typography>
+                <Typography variant="h4" color="secondary">{currenyTRY.format(product.price)}</Typography>
                 <TableContainer>
                     <Table>
                         <TableBody>
@@ -49,6 +69,23 @@ export default function ProductDetailsPage() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                <Stack direction="row" sx={{ mt: 3 }} alignItems="center" spacing={2}>
+                    <Button
+                        variant="outlined"
+                        loadingPosition="start"
+                        startIcon={<AddShoppingCart />}
+                        loading={isAdded}
+                        onClick={() => handleAddItem(product.id)}>
+                        Add to Card
+                    </Button>
+
+                    {
+                        item?.quantity! > 0 && (
+                            <Typography variant="body2">{item?.quantity} items added to your cart.</Typography>
+                        )
+                    }
+                </Stack>
             </Grid2>
         </Grid2>
     );

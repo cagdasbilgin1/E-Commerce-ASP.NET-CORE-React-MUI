@@ -6,6 +6,8 @@ import { Link } from "react-router";
 import { useState } from "react";
 import requests from "../../api/requests";
 import { useCartContext } from "../../context/CartContext";
+import { toast } from "react-toastify";
+import { currenyTRY } from "../../utils/formatCurrency";
 
 interface Props {
     product: IProduct
@@ -19,7 +21,10 @@ export default function Product({ product }: Props) {
         setLoading(true);
 
         requests.Cart.addItem(productId)
-            .then(cart => setCart(cart))
+            .then(cart => {
+                setCart(cart);
+                toast.success("Added to cart.");
+            })
             .catch(error => console.log(error))
             .finally(() => setLoading(false));
     }
@@ -32,7 +37,7 @@ export default function Product({ product }: Props) {
                     {product.name}
                 </Typography>
                 <Typography variant="body2" color="secondary">
-                    {(product.price / 100).toFixed(2)} ₺
+                    {currenyTRY.format(product.price)}
                 </Typography>
             </CardContent>
             <CardActions>
