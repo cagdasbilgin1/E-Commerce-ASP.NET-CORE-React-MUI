@@ -5,19 +5,17 @@ import { IProduct } from "../../model/IProduct";
 import requests from "../../api/requests";
 import NotFound from "../../errors/NotFound";
 import { AddShoppingCart } from "@mui/icons-material";
-import { toast } from "react-toastify";
 import { currenyTRY } from "../../utils/formatCurrency"
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
-import { setCart } from "../cart/cartSlice";
+import { addItemToCart } from "../cart/cartSlice";
 
 export default function ProductDetailsPage() {
 
-    const { cart } = useAppSelector(staet => staet.cart);
+    const { cart, status } = useAppSelector(staet => staet.cart);
     const dispatch = useAppDispatch();
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<IProduct | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isAdded, setIsAdded] = useState(false);
 
     const item = cart?.cartItems.find(i => i.productId == product?.id);
 
@@ -27,18 +25,6 @@ export default function ProductDetailsPage() {
             .catch(error => console.log(error))
             .finally(() => setLoading(false));
     }, [id]);
-
-    function handleAddItem(id: number) {
-        setIsAdded(true);
-
-        requests.Cart.addItem(id)
-            .then(cart => {
-                dispatch(setCart(cart));
-                toast.success("Added to cart.");
-            })
-            .catch(error => console.log(error))
-            .finally(() => setIsAdded(false));
-    }
 
     if (loading) return <CircularProgress />
 
@@ -77,8 +63,8 @@ export default function ProductDetailsPage() {
                         variant="outlined"
                         loadingPosition="start"
                         startIcon={<AddShoppingCart />}
-                        loading={isAdded}
-                        onClick={() => handleAddItem(product.id)}>
+                        loading={status === "pendingAddItem" + product.id}
+                        onClick={() => dispatch(addItemToCart({productId : product.id}))}>
                         Add to Card
                     </Button>
 

@@ -26,7 +26,7 @@ export const addItemToCart = createAsyncThunk<Cart, {productId : number, quantit
     }
 );
 
-export const deleteItemFromCart = createAsyncThunk<Cart, {productId : number, quantity? : number}>(
+export const deleteItemFromCart = createAsyncThunk<Cart, {productId : number, quantity? : number, key?: string}>(
     "cart/deleteItemFromCart",
     async ({productId, quantity = 1}) => {
         try
@@ -51,10 +51,11 @@ export const cartSlice = createSlice({
     extraReducers : (builder) => {
         builder.addCase(addItemToCart.pending, (state, action) => {
             console.log(action);
-            state.status = "pending";
+            state.status = "pendingAddItem" + action.meta.arg.productId;
         });
 
         builder.addCase(addItemToCart.fulfilled, (state, action) => {
+            console.log(action);
             state.cart = action.payload;
             state.status = "idle";
         });
@@ -65,7 +66,7 @@ export const cartSlice = createSlice({
 
         builder.addCase(deleteItemFromCart.pending, (state, action) => {
             console.log(action);
-            state.status = "pending";
+            state.status = "pendingDeleteItem" + action.meta.arg.productId + action.meta.arg.key;
         });
 
         builder.addCase(deleteItemFromCart.fulfilled, (state, action) => {

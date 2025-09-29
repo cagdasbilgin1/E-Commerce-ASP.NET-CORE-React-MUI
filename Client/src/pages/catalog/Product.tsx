@@ -3,12 +3,9 @@ import { IProduct } from "../../model/IProduct";
 import { Button, Card, CardActions, CardContent, CardMedia, Typography } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router";
-import { useState } from "react";
-import requests from "../../api/requests";
-import { toast } from "react-toastify";
 import { currenyTRY } from "../../utils/formatCurrency";
-import { useAppDispatch } from "../../hooks/hooks";
-import { setCart } from "../cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
+import { addItemToCart } from "../cart/cartSlice";
 
 interface Props {
     product: IProduct
@@ -16,20 +13,8 @@ interface Props {
 
 export default function Product({ product }: Props) {
 
-    const [loading, setLoading] = useState(false);
+    const { status } = useAppSelector(state => state.cart);
     const dispatch = useAppDispatch();
-
-    function handleAddItem(productId: number) {
-        setLoading(true);
-
-        requests.Cart.addItem(productId)
-            .then(cart => {
-                dispatch(setCart(cart));
-                toast.success("Added to cart.");
-            })
-            .catch(error => console.log(error))
-            .finally(() => setLoading(false));
-    }
 
     return (
         <Card>
@@ -46,8 +31,8 @@ export default function Product({ product }: Props) {
                 <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => handleAddItem(product.id)}
-                    loading={loading}
+                    onClick={() => dispatch(addItemToCart({ productId: product.id }))}
+                    loading={status === "pendingAddItem" + product.id}
                     startIcon={<AddShoppingCart />}
                     color="success">
                         Add to Card
