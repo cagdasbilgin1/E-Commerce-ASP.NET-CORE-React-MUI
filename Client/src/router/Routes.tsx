@@ -1,15 +1,15 @@
 import {createBrowserRouter} from "react-router";
-import App from "../components/App";
-import AboutPage from "../pages/AboutPage";
-import HomePage from "../pages/HomePage";
-import ContactPage from "../pages/ContactPage";
-import CatalogPage from "../pages/catalog/CatalogPage";
-import ProductDetails from "../pages/catalog/ProductDetails";
-import ErrorPage from "../pages/ErrorPage";
+import App from "../layout/App";
+import AboutPage from "../features/AboutPage";
+import HomePage from "../features/HomePage";
+import ContactPage from "../features/ContactPage";
+import CatalogPage from "../features/catalog/CatalogPage";
+import ProductDetails from "../features/catalog/ProductDetails";
+import ErrorPage from "../features/ErrorPage";
 import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import { Navigate } from "react-router";
-import ShoppingCartPage from "../pages/cart/ShoppingCartPage";
+import ShoppingCartPage from "../features/cart/ShoppingCartPage";
 
 export const router = createBrowserRouter([
     {
