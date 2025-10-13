@@ -1,6 +1,13 @@
+using System.Text;
 using API.Data;
+using API.Entity;
 using API.Middlewares;
+using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +18,42 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlite(connectionString);
 });
 builder.Services.AddCors();
+builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<DataContext>();
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireDigit = false;
+
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+});
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidIssuer = "cagdasbilgin.com",
+        // ValidIssuers = ["",""],
+        ValidateAudience = false,
+        ValidAudience = "abc",
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+            builder.Configuration["JWTSecurity:SecretKey"]!)),
+        ValidateLifetime = true
+    };
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandling>();
@@ -25,6 +66,7 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/openapi/v1.json", "API v1");
     });
+    app.MapScalarApiReference();
 }
 
 var summaries = new[]
@@ -49,8 +91,12 @@ app.MapGet("/weatherforecast", () =>
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors(opt => opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000"));
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+SeedDatabase.Initialize(app);
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

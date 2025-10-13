@@ -1,6 +1,7 @@
 using API.Data;
 using API.Entity;
 using API.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
