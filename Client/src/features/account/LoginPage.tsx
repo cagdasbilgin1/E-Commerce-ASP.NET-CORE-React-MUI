@@ -1,9 +1,9 @@
 import { LockOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
 import { FieldValues, useForm } from "react-hook-form";
-import { useAppDispatch } from "../../hooks/hooks";
 import { useNavigate } from "react-router";
 import { loginUser } from "./accountSlice";
+import { useAppDispatch } from "../../store/store";
 
 export default function LoginPage() {
     const dispatch = useAppDispatch();

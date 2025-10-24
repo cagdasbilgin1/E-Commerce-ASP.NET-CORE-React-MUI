@@ -4,8 +4,8 @@ import { Button, Card, CardActions, CardContent, CardMedia, Typography } from "@
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router";
 import { currenyTRY } from "../../utils/formatCurrency";
-import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { addItemToCart } from "../cart/cartSlice";
+import { useAppSelector, useAppDispatch } from "../../store/store";
 
 interface Props {
     product: IProduct
