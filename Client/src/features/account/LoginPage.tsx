@@ -4,6 +4,7 @@ import { FieldValues, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { loginUser } from "./accountSlice";
 import { useAppDispatch } from "../../store/store";
+import { getCart } from "../cart/cartSlice";
 
 export default function LoginPage() {
     const dispatch = useAppDispatch();
@@ -18,6 +19,7 @@ export default function LoginPage() {
 
     async function submitForm(data: FieldValues) {
         await dispatch(loginUser(data));
+        await dispatch(getCart());
         navigate("/catalog");
     }
 
