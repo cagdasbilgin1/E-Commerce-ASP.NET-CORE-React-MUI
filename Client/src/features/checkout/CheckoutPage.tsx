@@ -1,10 +1,11 @@
-import { Box, Button, Grid2, Paper, Step, StepLabel, Stepper } from "@mui/material";
+﻿import { Box, Button, Grid2, Paper, Step, StepLabel, Stepper, Stack, Typography  } from "@mui/material";
 import Info from "./Info";
 import AddressForm from "./AddressForm";
 import PaymentForm from "./PaymentForm";
 import Review from "./Review";
 import { useState } from "react";
 import { ChevronLeftRounded, ChevronRightRounded } from "@mui/icons-material";
+import { FieldValues, FormProvider, useForm } from "react-hook-form";
 
 const steps = ["Delivery Information", "Payment", "Order Summary"];
 
@@ -25,8 +26,10 @@ function getStepContent(step: number)
 export default function CheckoutPage()
 {
     const [activeStep, setActiveStep] = useState(0);
+    const methods = useForm();
 
-    function handleNext() {
+    function handleNext(data: FieldValues) {
+        console.log(data);
         setActiveStep(activeStep + 1);
     }
 
@@ -35,55 +38,71 @@ export default function CheckoutPage()
     }
 
     return (
-        <Paper>
-            <Grid2 container sx={{p:4}} spacing={4}>
-                <Grid2 size={4}>
-                    <Info />
+        <FormProvider {...methods}>
+            <Paper>
+            <Grid2 container spacing={4}>
+                <Grid2 size={4} sx={{
+                        borderRight: "1px solid",
+                        borderColor: "divider",
+                        p: 3
+                    }}><Info />
                 </Grid2>
-                <Grid2 size={8}>
-                   <Box >
-                        <Stepper activeStep={activeStep} sx={{height: 40}}>
-                            { steps.map((label) => (
-                                <Step key={label}>
-                                    <StepLabel>{label}</StepLabel>
-                                </Step>
-                            ))}
-                        </Stepper>
-                   </Box>
-                   <Box>
-                        {activeStep === steps.length ? (
-                            <h2>Order completed.</h2>
-                        ) : (
-                            <>
-                                {getStepContent(activeStep)}
-                                <Box>
+                <Grid2 size={8} sx={{p:3}}>
+                    <Box >
+                            <Stepper activeStep={activeStep} sx={{height: 40, mb: 4}}>
+                                { steps.map((label) => (
+                                    <Step key={label}>
+                                        <StepLabel>{label}</StepLabel>
+                                    </Step>
+                                ))}
+                            </Stepper>
+                    </Box>
+                    <Box>
+                            {activeStep === steps.length ? (
+                                <Stack spacing={2}>
+                                    <Typography variant="h1">📦</Typography>
+                                    <Typography variant="h5">Order Completed</Typography>
+                                    <Typography variant="body1" sx={{color: "text.secondary"}}>
+                                        Your order number <strong>#1234</strong>. We will send you an email when your order is confirmed.
+                                    </Typography>
+                                    <Button 
+                                    sx={{alignSelf: "start", 
+                                        width: {xs: "100%", sm: "auto"}}}                                    
+                                    variant="contained">List Orders</Button>
+                                </Stack>
+                            ) : (
+                                <form onSubmit={methods.handleSubmit(handleNext)}>
+                                    {getStepContent(activeStep)}
+                                    <Box>
 
-                                    <Box sx={
-                                        [
+                                        <Box sx={
+                                            [
+                                                {
+                                                    display: "flex",
+                                                },
+                                                activeStep !== 0 
+                                                    ? { justifyContent: "space-between" }
+                                                    : { justifyContent: "flex-end" }
+                                            ]
+                                        }>
                                             {
-                                                display: "flex",
-                                            },
-                                            activeStep !== 0 
-                                                ? { justifyContent: "space-between" }
-                                                : { justifyContent: "flex-end" }
-                                        ]
-                                    }>
-                                        {
-                                            activeStep !== 0 && 
-                                                <Button startIcon={<ChevronLeftRounded />} variant="contained" 
-                                                onClick={handlePrevious}>Back</Button>
-                                        }
+                                                activeStep !== 0 && 
+                                                    <Button startIcon={<ChevronLeftRounded />} variant="contained" 
+                                                    onClick={handlePrevious}>Back</Button>
+                                            }
 
-                                        <Button startIcon={<ChevronRightRounded />} variant="contained" 
-                                            onClick={handleNext}>Next</Button>
+                                            <Button
+                                                type="submit" 
+                                                startIcon={<ChevronRightRounded />} variant="contained">Next</Button>
+                                        </Box>
                                     </Box>
-                                </Box>
-                            </>
-                        )}
-                       
-                   </Box>
-                </Grid2>
+                                </form>
+                            )}
+                        
+                    </Box>
+                    </Grid2>
             </Grid2>
-        </Paper>
+            </Paper>
+        </FormProvider>
     );
 }
