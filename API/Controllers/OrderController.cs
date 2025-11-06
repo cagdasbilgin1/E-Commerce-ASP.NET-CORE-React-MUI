@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTO;
 using API.Entity;
@@ -19,7 +23,7 @@ namespace API.Controllers
             _context = context;
         }
 
-        [HttpGet("GetOrders")]
+        [HttpGet]
         public async Task<ActionResult<List<OrderDTO>>> GetOrders()
         {
             return await _context.Orders
@@ -29,7 +33,7 @@ namespace API.Controllers
                         .ToListAsync();
         }
 
-        [HttpGet("{id}", Name = "GetOrder")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<OrderDTO?>> GetOrder(int id)
         {
             return await _context.Orders
@@ -39,7 +43,7 @@ namespace API.Controllers
                         .FirstOrDefaultAsync();
         }
 
-        [HttpPost("CreateOrder")]
+        [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(CreateOrderDTO orderDTO)
         {
             var cart = await _context.Carts
@@ -91,7 +95,7 @@ namespace API.Controllers
             var result = await _context.SaveChangesAsync() > 0;
 
             if (result)
-                return CreatedAtRoute(nameof(GetOrder), new { id = order.Id }, order.Id);
+                return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order.Id);
 
             return BadRequest(new ProblemDetails { Title = "Problem getting order" });
         }

@@ -11,7 +11,7 @@ export default function ShoppingCartPage()
     const { cart, status } = useAppSelector(staet => staet.cart);
     const dispatch = useAppDispatch();
 
-    if (cart?.cartItems.length === 0) return <Alert severity="warning">Cart is empty</Alert>    
+    if (!cart || cart?.cartItems.length === 0) return <Alert severity="warning">Cart is empty</Alert>    
 
     return (
         <>
